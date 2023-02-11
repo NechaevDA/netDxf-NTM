@@ -1,4 +1,4 @@
-#region netDxf library licensed under the MIT License
+﻿#region netDxf library licensed under the MIT License
 // 
 //                       netDxf library
 // Copyright (c) 2019-2021 Daniel Carvajal (haplokuon@gmail.com)
@@ -2944,6 +2944,167 @@ namespace netDxf.IO
             this.WriteXData(point.XData);
         }
 
+        struct ShiftDefinition
+        {
+            public double X;
+            public double Y;
+            public ShiftDefinition(double x, double y)
+            {
+                X = x;
+                Y = y;
+            }
+        }
+
+#warning Костылище для шрифта GOST type A. Предварительное вычисление отступа для корректного отображения в нанокаде 
+        private double _bottomYOffset = 1.2806;
+        private double _mockFontSize = 4;
+        private Dictionary<char, ShiftDefinition> AlignmentMockGOST = new Dictionary<char, ShiftDefinition>
+        {
+            { 'A', new ShiftDefinition(1.4300, 1.2806) },
+            { 'B', new ShiftDefinition(1.2860, 1.2806) },
+            { 'C', new ShiftDefinition(1.1440, 1.2806) },
+            { 'D', new ShiftDefinition(1.2860, 1.2806) },
+            { 'E', new ShiftDefinition(1.1440, 1.2806) },
+            { 'F', new ShiftDefinition(1.1440, 1.2806) },
+            { 'G', new ShiftDefinition(1.2860, 1.2806) },
+            { 'H', new ShiftDefinition(1.2860, 1.2806) },
+            { 'I', new ShiftDefinition(0.4280, 1.2806) },
+            { 'J', new ShiftDefinition(1.0000, 1.2806) },
+            { 'K', new ShiftDefinition(1.2860, 1.2806) },
+            { 'L', new ShiftDefinition(1.0000, 1.2806) },
+            { 'M', new ShiftDefinition(1.5720, 1.2806) },
+            { 'N', new ShiftDefinition(1.2860, 1.2806) },
+            { 'O', new ShiftDefinition(1.2860, 1.2806) },
+            { 'P', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Q', new ShiftDefinition(1.4300, 1.2806) },
+            { 'R', new ShiftDefinition(1.2860, 1.2806) },
+            { 'S', new ShiftDefinition(1.2860, 1.2806) },
+            { 'T', new ShiftDefinition(1.2860, 1.2806) },
+            { 'U', new ShiftDefinition(1.2860, 1.2806) },
+            { 'V', new ShiftDefinition(1.4300, 1.2806) },
+            { 'W', new ShiftDefinition(2.0000, 1.2806) },
+            { 'X', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Y', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Z', new ShiftDefinition(1.2860, 1.2806) },
+            { 'a', new ShiftDefinition(1.1440, 1.2806) },
+            { 'b', new ShiftDefinition(1.1440, 1.2806) },
+            { 'c', new ShiftDefinition(1.1440, 1.2806) },
+            { 'd', new ShiftDefinition(1.1440, 1.2806) },
+            { 'e', new ShiftDefinition(1.1440, 1.2806) },
+            { 'f', new ShiftDefinition(0.8580, 1.2806) },
+            { 'g', new ShiftDefinition(1.1440, 1.2806) },
+            { 'h', new ShiftDefinition(1.1440, 1.2806) },
+            { 'i', new ShiftDefinition(0.4280, 1.2806) },
+            { 'j', new ShiftDefinition(0.2780, 1.2806) },
+            { 'k', new ShiftDefinition(1.1440, 1.2806) },
+            { 'l', new ShiftDefinition(0.7140, 1.2806) },
+            { 'm', new ShiftDefinition(1.5720, 1.2806) },
+            { 'n', new ShiftDefinition(1.1440, 1.2806) },
+            { 'o', new ShiftDefinition(1.1440, 1.2806) },
+            { 'p', new ShiftDefinition(1.1440, 1.2806) },
+            { 'q', new ShiftDefinition(1.1440, 1.2806) },
+            { 'r', new ShiftDefinition(1.0000, 1.2806) },
+            { 's', new ShiftDefinition(1.1440, 1.2806) },
+            { 't', new ShiftDefinition(0.8580, 1.2806) },
+            { 'u', new ShiftDefinition(1.1440, 1.2806) },
+            { 'v', new ShiftDefinition(1.1440, 1.2806) },
+            { 'w', new ShiftDefinition(1.7160, 1.2806) },
+            { 'x', new ShiftDefinition(1.1440, 1.2806) },
+            { 'y', new ShiftDefinition(1.1440, 1.2806) },
+            { 'z', new ShiftDefinition(1.1440, 1.2806) },
+            { 'А', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Б', new ShiftDefinition(1.2860, 1.2806) },
+            { 'В', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Г', new ShiftDefinition(1.1440, 1.2806) },
+            { 'Д', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Е', new ShiftDefinition(1.1440, 1.2806) },
+            { 'Ё', new ShiftDefinition(1.1440, 1.2806) },
+            { 'Ж', new ShiftDefinition(1.5720, 1.2806) },
+            { 'З', new ShiftDefinition(1.2860, 1.2806) },
+            { 'И', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Й', new ShiftDefinition(1.2860, 1.2806) },
+            { 'К', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Л', new ShiftDefinition(1.4300, 1.2806) },
+            { 'М', new ShiftDefinition(1.5720, 1.2806) },
+            { 'Н', new ShiftDefinition(1.2860, 1.2806) },
+            { 'О', new ShiftDefinition(1.2860, 1.2806) },
+            { 'П', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Р', new ShiftDefinition(1.2860, 1.2806) },
+            { 'С', new ShiftDefinition(1.1440, 1.2806) },
+            { 'Т', new ShiftDefinition(1.2860, 1.2806) },
+            { 'У', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Ф', new ShiftDefinition(1.8580, 1.2806) },
+            { 'Х', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Ц', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Ч', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Ш', new ShiftDefinition(1.5720, 1.2806) },
+            { 'Щ', new ShiftDefinition(1.7160, 1.2806) },
+            { 'Ь', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Ы', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Ъ', new ShiftDefinition(1.5720, 1.2806) },
+            { 'Э', new ShiftDefinition(1.2860, 1.2806) },
+            { 'Ю', new ShiftDefinition(1.4300, 1.2806) },
+            { 'Я', new ShiftDefinition(1.2860, 1.2806) },
+            { 'а', new ShiftDefinition(1.1440, 1.2806) },
+            { 'б', new ShiftDefinition(1.1440, 1.2806) },
+            { 'в', new ShiftDefinition(1.1440, 1.2806) },
+            { 'г', new ShiftDefinition(1.1440, 1.2806) },
+            { 'д', new ShiftDefinition(1.1440, 1.2806) },
+            { 'е', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ё', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ж', new ShiftDefinition(1.4300, 1.2806) },
+            { 'з', new ShiftDefinition(1.0720, 1.2806) },
+            { 'и', new ShiftDefinition(1.1440, 1.2806) },
+            { 'й', new ShiftDefinition(1.1440, 1.2806) },
+            { 'к', new ShiftDefinition(1.1440, 1.2806) },
+            { 'л', new ShiftDefinition(1.1440, 1.2806) },
+            { 'м', new ShiftDefinition(1.2860, 1.2806) },
+            { 'н', new ShiftDefinition(1.1440, 1.2806) },
+            { 'о', new ShiftDefinition(1.1440, 1.2806) },
+            { 'п', new ShiftDefinition(1.1440, 1.2806) },
+            { 'р', new ShiftDefinition(1.1440, 1.2806) },
+            { 'с', new ShiftDefinition(1.1440, 1.2806) },
+            { 'т', new ShiftDefinition(1.5720, 1.2806) },
+            { 'у', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ф', new ShiftDefinition(1.5720, 1.2806) },
+            { 'х', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ц', new ShiftDefinition(1.2860, 1.2806) },
+            { 'ч', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ш', new ShiftDefinition(1.5720, 1.2806) },
+            { 'щ', new ShiftDefinition(1.7160, 1.2806) },
+            { 'ь', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ы', new ShiftDefinition(1.2860, 1.2806) },
+            { 'ъ', new ShiftDefinition(1.4300, 1.2806) },
+            { 'э', new ShiftDefinition(1.1440, 1.2806) },
+            { 'ю', new ShiftDefinition(1.2860, 1.2806) },
+            { 'я', new ShiftDefinition(1.1440, 1.2806) },
+            { '0', new ShiftDefinition(1.2860, 1.2806) },
+            { '1', new ShiftDefinition(0.8580, 1.2806) },
+            { '2', new ShiftDefinition(1.2860, 1.2806) },
+            { '3', new ShiftDefinition(1.1440, 1.2806) },
+            { '4', new ShiftDefinition(1.2860, 1.2806) },
+            { '5', new ShiftDefinition(1.1440, 1.2806) },
+            { '6', new ShiftDefinition(1.2860, 1.2806) },
+            { '7', new ShiftDefinition(1.2860, 1.2806) },
+            { '8', new ShiftDefinition(1.2860, 1.2806) },
+            { '9', new ShiftDefinition(1.2860, 1.2806) },
+            { '.', new ShiftDefinition(0.3580, 1.2806) },
+            { ':', new ShiftDefinition(0.4200, 1.2806) },
+            { ',', new ShiftDefinition(0.4280, 1.2806) },
+            { ';', new ShiftDefinition(0.6440, 1.2806) },
+            { '\'', new ShiftDefinition(0.4280, 1.2806) },
+            { '"', new ShiftDefinition(0.7140, 1.2806) },
+            { '(', new ShiftDefinition(0.5720, 1.2806) },
+            { '!', new ShiftDefinition(0.4280, 1.2806) },
+            { '?', new ShiftDefinition(1.2140, 1.2806) },
+            { ')', new ShiftDefinition(0.5720, 1.2806) },
+            { '+', new ShiftDefinition(1.0000, 1.2806) },
+            { '-', new ShiftDefinition(1.1440, 1.2806) },
+            { '*', new ShiftDefinition(1.2860, 1.2806) },
+            { '/', new ShiftDefinition(1.5720, 1.2806) },
+            { '=', new ShiftDefinition(1.0000, 1.2806) }
+        };
+
         private void WriteText(Text text)
         {
             this.chunk.Write(100, SubclassMarker.Text);
@@ -2954,9 +3115,49 @@ namespace netDxf.IO
             // while the MText position is written in WCS the position of the Text is written in OCS (different rules for the same concept).
             Vector3 ocsBasePoint = MathHelper.Transform(text.Position, text.Normal, CoordinateSystem.World, CoordinateSystem.Object);
 
-            this.chunk.Write(10, ocsBasePoint.X);
-            this.chunk.Write(20, ocsBasePoint.Y);
-            this.chunk.Write(30, ocsBasePoint.Z);
+            if (text.Alignment == TextAlignment.BottomCenter || 
+                text.Alignment == TextAlignment.TopCenter ||
+                text.Alignment == TextAlignment.MiddleCenter)
+            {
+                double scaleFactor = text.Height / _mockFontSize;
+
+                double yOffset = 0;
+                switch (text.Alignment)
+                {
+                    case TextAlignment.TopCenter:
+                        yOffset = -text.Height;
+                        break;
+                    case TextAlignment.MiddleCenter:
+                        yOffset = -text.Height / 2;
+                        break;
+                    case TextAlignment.BottomCenter:
+                        yOffset = _bottomYOffset * scaleFactor;
+                        break;
+                    default:
+                        break;
+                }
+
+                double xOffset = -text.Value.Select(symbol =>
+                {
+                    if (AlignmentMockGOST.ContainsKey(symbol))
+                    {
+                        return AlignmentMockGOST[symbol].X;
+                    }
+                    else return 2d;
+                }).Sum() * scaleFactor;
+
+                Vector3 shiftedBasePoint = new Vector3(ocsBasePoint.X + xOffset, ocsBasePoint.Y + yOffset, ocsBasePoint.Z);
+
+                this.chunk.Write(10, shiftedBasePoint.X);
+                this.chunk.Write(20, shiftedBasePoint.Y);
+                this.chunk.Write(30, shiftedBasePoint.Z);
+            }
+            else
+            {
+                this.chunk.Write(10, ocsBasePoint.X);
+                this.chunk.Write(20, ocsBasePoint.Y);
+                this.chunk.Write(30, ocsBasePoint.Z);
+            }            
 
             this.chunk.Write(40, text.Height);
 
